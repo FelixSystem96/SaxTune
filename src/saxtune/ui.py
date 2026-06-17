@@ -33,6 +33,8 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.shuffle_on = False
         self.repeat_mode = 0   # 0=off  1=all  2=one
         self._shuffle_played = set()
+        self._muted = False
+        self._volume_before_mute = 0.7
         self.seek_dragging = False
         self._updating_seek = False
         self._seek_debounce_id = None
@@ -246,8 +248,12 @@ class PlayerWindow(Adw.ApplicationWindow):
         vol = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
         vol.set_halign(Gtk.Align.CENTER)
 
-        vol_icon = Gtk.Image.new_from_icon_name('audio-volume-medium-symbolic')
-        vol.append(vol_icon)
+        self.btn_mute = Gtk.Button()
+        self.btn_mute.set_icon_name('audio-volume-medium-symbolic')
+        self.btn_mute.add_css_class('flat')
+        self.btn_mute.add_css_class('circular')
+        self.btn_mute.connect('clicked', self._toggle_mute)
+        vol.append(self.btn_mute)
 
         self.vol_scale = Gtk.Scale.new_with_range(
             Gtk.Orientation.HORIZONTAL, 0, 100, 1)
@@ -258,7 +264,6 @@ class PlayerWindow(Adw.ApplicationWindow):
         vol.append(self.vol_scale)
 
         self.lbl_vol = Gtk.Label(label='70%')
-        self.lbl_vol.add_css_class('dim-label')
         self.lbl_vol.add_css_class('caption')
         self.lbl_vol.set_width_chars(4)
         vol.append(self.lbl_vol)
@@ -665,8 +670,37 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     def _on_volume_change(self, scale):
         v = scale.get_value()
+        if self._muted:
+            self._muted = False
+            self.vol_scale.set_opacity(1.0)
         self.audio.set_volume(v / 100)
         self.lbl_vol.set_label(f'{int(v)}%')
+        self._update_vol_icon(v)
+
+    def _update_vol_icon(self, v):
+        if v == 0:
+            icon = 'audio-volume-muted-symbolic'
+        elif v < 35:
+            icon = 'audio-volume-low-symbolic'
+        elif v < 70:
+            icon = 'audio-volume-medium-symbolic'
+        else:
+            icon = 'audio-volume-high-symbolic'
+        self.btn_mute.set_icon_name(icon)
+
+    def _toggle_mute(self, _):
+        if self._muted:
+            self._muted = False
+            self.audio.set_volume(self._volume_before_mute)
+            self.vol_scale.set_value(self._volume_before_mute * 100)
+            self._update_vol_icon(self._volume_before_mute * 100)
+            self.vol_scale.set_opacity(1.0)
+        else:
+            self._volume_before_mute = self.audio.volume
+            self._muted = True
+            self.audio.set_volume(0)
+            self.btn_mute.set_icon_name('audio-volume-muted-symbolic')
+            self.vol_scale.set_opacity(0.35)
 
     # ── Seek ──────────────────────────────────────────────────────────────────
 
