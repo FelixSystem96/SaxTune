@@ -314,26 +314,39 @@ class PlayerWindow(Adw.ApplicationWindow):
         sep.set_margin_bottom(4)
         box.append(sep)
 
-        lbl_theme = Gtk.Label(label='Tema')
-        lbl_theme.add_css_class('heading')
-        lbl_theme.set_halign(Gtk.Align.START)
-        box.append(lbl_theme)
-
         theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        lbl_light = Gtk.Label(label='Claro')
-        lbl_light.add_css_class('dim-label')
-        theme_row.append(lbl_light)
+
+        is_dark = self._config.get('color_scheme', 'dark') == 'dark'
+        self.lbl_theme = Gtk.Label(label='Oscuro' if is_dark else 'Claro')
+        self.lbl_theme.set_hexpand(True)
+        self.lbl_theme.set_halign(Gtk.Align.START)
+        theme_row.append(self.lbl_theme)
 
         self.theme_switch = Gtk.Switch()
-        self.theme_switch.set_active(self._config.get('color_scheme', 'dark') == 'dark')
+        self.theme_switch.set_active(is_dark)
         self.theme_switch.connect('notify::active', self._on_theme_switched)
         theme_row.append(self.theme_switch)
 
-        lbl_dark = Gtk.Label(label='Oscuro')
-        lbl_dark.add_css_class('dim-label')
-        theme_row.append(lbl_dark)
-
         box.append(theme_row)
+
+        sep2 = Gtk.Separator()
+        sep2.set_margin_top(4)
+        sep2.set_margin_bottom(4)
+        box.append(sep2)
+
+        playlist_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+
+        lbl_playlist = Gtk.Label(label='Guardar playlist al cerrar')
+        lbl_playlist.set_hexpand(True)
+        lbl_playlist.set_halign(Gtk.Align.START)
+        playlist_row.append(lbl_playlist)
+
+        self.playlist_switch = Gtk.Switch()
+        self.playlist_switch.set_active(self._config.get('save_playlist', True))
+        self.playlist_switch.connect('notify::active', self._on_playlist_switch)
+        playlist_row.append(self.playlist_switch)
+
+        box.append(playlist_row)
         popover.set_child(box)
         return popover
 
@@ -356,12 +369,18 @@ class PlayerWindow(Adw.ApplicationWindow):
         dialog.select_folder(self, None, self._on_default_folder_ready)
 
     def _on_theme_switched(self, switch, _):
-        scheme = 'dark' if switch.get_active() else 'light'
+        is_dark = switch.get_active()
+        scheme = 'dark' if is_dark else 'light'
+        self.lbl_theme.set_label('Oscuro' if is_dark else 'Claro')
         self._config['color_scheme'] = scheme
         config_save(self._config)
         Adw.StyleManager.get_default().set_color_scheme(
-            Adw.ColorScheme.FORCE_DARK if scheme == 'dark' else Adw.ColorScheme.FORCE_LIGHT
+            Adw.ColorScheme.FORCE_DARK if is_dark else Adw.ColorScheme.FORCE_LIGHT
         )
+
+    def _on_playlist_switch(self, switch, _):
+        self._config['save_playlist'] = switch.get_active()
+        config_save(self._config)
 
     def _on_default_folder_ready(self, dialog, result):
         try:
@@ -432,8 +451,12 @@ class PlayerWindow(Adw.ApplicationWindow):
         return False
 
     def _on_close_request(self, *_):
-        self._config['playlist'] = self.playlist[:]
-        self._config['current_index'] = self.current_idx
+        if self._config.get('save_playlist', True):
+            self._config['playlist'] = self.playlist[:]
+            self._config['current_index'] = self.current_idx
+        else:
+            self._config['playlist'] = []
+            self._config['current_index'] = -1
         self._config['shuffle'] = self.shuffle_on
         self._config['repeat'] = self.repeat_mode
         config_save(self._config)
