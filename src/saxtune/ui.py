@@ -209,6 +209,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.btn_shuffle.set_icon_name('media-playlist-shuffle-symbolic')
         self.btn_shuffle.add_css_class('flat')
         self.btn_shuffle.add_css_class('circular')
+        self.btn_shuffle.set_tooltip_text('Orden aleatorio: desactivado')
         self.btn_shuffle.connect('toggled', self._on_shuffle_toggled)
         ctrl.append(self.btn_shuffle)
 
@@ -238,6 +239,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.btn_repeat.set_icon_name('media-playlist-repeat-symbolic')
         self.btn_repeat.add_css_class('flat')
         self.btn_repeat.add_css_class('circular')
+        self.btn_repeat.set_tooltip_text('Repetición: desactivada')
         self.btn_repeat.connect('clicked', self._cycle_repeat)
         ctrl.append(self.btn_repeat)
 
@@ -645,6 +647,9 @@ class PlayerWindow(Adw.ApplicationWindow):
     def _on_shuffle_toggled(self, btn):
         self.shuffle_on = btn.get_active()
         self._shuffle_played.clear()
+        self.btn_shuffle.set_tooltip_text(
+            'Orden aleatorio: activado' if self.shuffle_on else 'Orden aleatorio: desactivado'
+        )
         if self._mpris:
             self._mpris.notify('Shuffle')
 
@@ -658,7 +663,13 @@ class PlayerWindow(Adw.ApplicationWindow):
             'media-playlist-repeat-symbolic',
             'media-playlist-repeat-song-symbolic',
         ]
+        tooltips = [
+            'Repetición: desactivada',
+            'Repetición: toda la lista',
+            'Repetición: canción actual',
+        ]
         self.btn_repeat.set_icon_name(icons[mode])
+        self.btn_repeat.set_tooltip_text(tooltips[mode])
         if mode > 0:
             self.btn_repeat.remove_css_class('flat')
             self.btn_repeat.add_css_class('suggested-action')
