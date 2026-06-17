@@ -1,7 +1,8 @@
 import json
 import os
 
-_PATH = os.path.expanduser('~/.config/saxtune/config.json')
+_CONFIG_DIR = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
+_PATH = os.path.join(_CONFIG_DIR, 'saxtune', 'config.json')
 
 
 def load():

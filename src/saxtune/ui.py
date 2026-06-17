@@ -484,11 +484,14 @@ class PlayerWindow(Adw.ApplicationWindow):
             files = dialog.open_multiple_finish(result)
         except GLib.Error:
             return
+        was_empty = not self.playlist
         for i in range(files.get_n_items()):
             path = files.get_item(i).get_path()
             if path and path not in self.playlist:
                 self._append_song(path)
         self._update_count()
+        if was_empty and self.playlist:
+            self._play_index(0)
 
     def _add_folder(self):
         dialog = Gtk.FileDialog.new()
@@ -506,6 +509,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         folder = folder_file.get_path()
         if not folder:
             return
+        was_empty = not self.playlist
         for root_dir, _, files in os.walk(folder):
             for name in sorted(files):
                 if name.lower().endswith('.mp3'):
@@ -513,6 +517,8 @@ class PlayerWindow(Adw.ApplicationWindow):
                     if path not in self.playlist:
                         self._append_song(path)
         self._update_count()
+        if was_empty and self.playlist:
+            self._play_index(0)
 
     def _append_song(self, path):
         self.playlist.append(path)
