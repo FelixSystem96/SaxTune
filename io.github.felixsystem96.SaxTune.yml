@@ -38,5 +38,5 @@ modules:
     sources:
       - type: git
         url: https://github.com/FelixSystem96/SaxTune.git
-        tag: v1.0.1
-        commit: 7f32bb91e9d01c21135d431cb3786b5f41163bc8
+        tag: v1.0.2
+        commit: bb9ee2b5b1de507a64c33cb7f2f38a63d3259d4c
