@@ -1,0 +1,84 @@
+# Spanish translations for SaxTune
+# Copyright (C) 2026 Felix Moya Ortega
+msgid ""
+msgstr ""
+"Project-Id-Version: saxtune 1.0\n"
+"PO-Revision-Date: 2026-06-17\n"
+"Last-Translator: Felix Moya Ortega\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "+ Files"
+msgstr "+ Archivos"
+
+msgid "+ Folder"
+msgstr "+ Carpeta"
+
+msgid "No playback"
+msgstr "Sin reproducción"
+
+msgid "%d song"
+msgid_plural "%d songs"
+msgstr[0] "%d canción"
+msgstr[1] "%d canciones"
+
+msgid "Clear list"
+msgstr "Limpiar lista"
+
+msgid "Default folder"
+msgstr "Carpeta por defecto"
+
+msgid "Not set"
+msgstr "No configurada"
+
+msgid "Change"
+msgstr "Cambiar"
+
+msgid "Dark"
+msgstr "Oscuro"
+
+msgid "Light"
+msgstr "Claro"
+
+msgid "Save playlist on close"
+msgstr "Guardar playlist al cerrar"
+
+msgid "Select MP3 files"
+msgstr "Seleccionar archivos MP3"
+
+msgid "MP3 files"
+msgstr "Archivos MP3"
+
+msgid "Select music folder"
+msgstr "Seleccionar carpeta de música"
+
+msgid "Default music folder"
+msgstr "Carpeta de música por defecto"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "OK"
+msgstr "Aceptar"
+
+msgid "Cannot play:"
+msgstr "No se puede reproducir:"
+
+msgid "Shuffle: off"
+msgstr "Orden aleatorio: desactivado"
+
+msgid "Shuffle: on"
+msgstr "Orden aleatorio: activado"
+
+msgid "Repeat: off"
+msgstr "Repetición: desactivada"
+
+msgid "Repeat: all"
+msgstr "Repetición: toda la lista"
+
+msgid "Repeat: one"
+msgstr "Repetición: canción actual"

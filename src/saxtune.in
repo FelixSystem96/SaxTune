@@ -1,12 +1,24 @@
 #!@PYTHON@
 import sys
 import os
+import locale
+import gettext
 import gi
 
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 
 pkgdatadir = '@pkgdatadir@'
+localedir = '@localedir@'
+
+try:
+    locale.setlocale(locale.LC_ALL, '')
+except locale.Error:
+    pass
+
+gettext.bindtextdomain('saxtune', localedir)
+gettext.textdomain('saxtune')
+
 sys.path.insert(1, pkgdatadir)
 
 from saxtune.main import main

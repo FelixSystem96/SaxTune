@@ -4,6 +4,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw, GLib, Gio, Pango, GdkPixbuf, Gdk
 import os
 import random
+from gettext import gettext as _, ngettext
 from .audio import AudioPlayer
 from .config import load as config_load, save as config_save
 from .mpris import setup as mpris_setup
@@ -54,12 +55,12 @@ class PlayerWindow(Adw.ApplicationWindow):
 
         header = Adw.HeaderBar()
 
-        btn_files = Gtk.Button(label='＋ Archivos')
+        btn_files = Gtk.Button(label=_('+ Files'))
         btn_files.add_css_class('flat')
         btn_files.connect('clicked', lambda _: self._add_files())
         header.pack_start(btn_files)
 
-        btn_folder = Gtk.Button(label='＋ Carpeta')
+        btn_folder = Gtk.Button(label=_('+ Folder'))
         btn_folder.add_css_class('flat')
         btn_folder.connect('clicked', lambda _: self._add_folder())
         header.pack_start(btn_folder)
@@ -85,7 +86,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         box.set_size_request(220, -1)
 
-        self.lbl_count = Gtk.Label(label='0 canciones')
+        self.lbl_count = Gtk.Label(label=ngettext('%d song', '%d songs', 0) % 0)
         self.lbl_count.add_css_class('dim-label')
         self.lbl_count.add_css_class('caption')
         self.lbl_count.set_halign(Gtk.Align.START)
@@ -105,7 +106,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         scroll.set_child(self.listbox)
         box.append(scroll)
 
-        btn_clear = Gtk.Button(label='Limpiar lista')
+        btn_clear = Gtk.Button(label=_('Clear list'))
         btn_clear.add_css_class('flat')
         btn_clear.connect('clicked', lambda _: self._clear_playlist())
         btn_clear.set_margin_top(4)
@@ -129,7 +130,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         meta = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
         meta.set_hexpand(True)
 
-        self.lbl_title = Gtk.Label(label='Sin reproducción')
+        self.lbl_title = Gtk.Label(label=_('No playback'))
         self.lbl_title.add_css_class('title-3')
         self.lbl_title.set_halign(Gtk.Align.START)
         self.lbl_title.set_ellipsize(Pango.EllipsizeMode.END)
@@ -209,7 +210,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.btn_shuffle.set_icon_name('media-playlist-shuffle-symbolic')
         self.btn_shuffle.add_css_class('flat')
         self.btn_shuffle.add_css_class('circular')
-        self.btn_shuffle.set_tooltip_text('Orden aleatorio: desactivado')
+        self.btn_shuffle.set_tooltip_text(_('Shuffle: off'))
         self.btn_shuffle.connect('toggled', self._on_shuffle_toggled)
         ctrl.append(self.btn_shuffle)
 
@@ -239,7 +240,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.btn_repeat.set_icon_name('media-playlist-repeat-symbolic')
         self.btn_repeat.add_css_class('flat')
         self.btn_repeat.add_css_class('circular')
-        self.btn_repeat.set_tooltip_text('Repetición: desactivada')
+        self.btn_repeat.set_tooltip_text(_('Repeat: off'))
         self.btn_repeat.connect('clicked', self._cycle_repeat)
         ctrl.append(self.btn_repeat)
 
@@ -288,7 +289,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         box.set_margin_start(14)
         box.set_margin_end(14)
 
-        lbl_heading = Gtk.Label(label='Carpeta por defecto')
+        lbl_heading = Gtk.Label(label=_('Default folder'))
         lbl_heading.add_css_class('heading')
         lbl_heading.set_halign(Gtk.Align.START)
         box.append(lbl_heading)
@@ -302,7 +303,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self._refresh_folder_label()
         row.append(self.lbl_default_folder)
 
-        btn_change = Gtk.Button(label='Cambiar')
+        btn_change = Gtk.Button(label=_('Change'))
         btn_change.add_css_class('flat')
         btn_change.connect('clicked', lambda _: self._pick_default_folder(popover))
         row.append(btn_change)
@@ -317,7 +318,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         theme_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
         is_dark = self._config.get('color_scheme', 'dark') == 'dark'
-        self.lbl_theme = Gtk.Label(label='Oscuro' if is_dark else 'Claro')
+        self.lbl_theme = Gtk.Label(label=_('Dark') if is_dark else _('Light'))
         self.lbl_theme.set_hexpand(True)
         self.lbl_theme.set_halign(Gtk.Align.START)
         theme_row.append(self.lbl_theme)
@@ -336,7 +337,7 @@ class PlayerWindow(Adw.ApplicationWindow):
 
         playlist_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
 
-        lbl_playlist = Gtk.Label(label='Guardar playlist al cerrar')
+        lbl_playlist = Gtk.Label(label=_('Save playlist on close'))
         lbl_playlist.set_hexpand(True)
         lbl_playlist.set_halign(Gtk.Align.START)
         playlist_row.append(lbl_playlist)
@@ -356,22 +357,22 @@ class PlayerWindow(Adw.ApplicationWindow):
             self.lbl_default_folder.set_label(folder)
             self.lbl_default_folder.remove_css_class('dim-label')
         else:
-            self.lbl_default_folder.set_label('No configurada')
+            self.lbl_default_folder.set_label(_('Not set'))
             self.lbl_default_folder.add_css_class('dim-label')
 
     def _pick_default_folder(self, popover):
         popover.popdown()
         dialog = Gtk.FileDialog.new()
-        dialog.set_title('Carpeta de música por defecto')
+        dialog.set_title(_('Default music folder'))
         current = self._config.get('default_folder')
         if current and os.path.isdir(current):
             dialog.set_initial_folder(Gio.File.new_for_path(current))
         dialog.select_folder(self, None, self._on_default_folder_ready)
 
-    def _on_theme_switched(self, switch, _):
+    def _on_theme_switched(self, switch, param):
         is_dark = switch.get_active()
         scheme = 'dark' if is_dark else 'light'
-        self.lbl_theme.set_label('Oscuro' if is_dark else 'Claro')
+        self.lbl_theme.set_label(_('Dark') if is_dark else _('Light'))
         self._config['color_scheme'] = scheme
         config_save(self._config)
         Adw.StyleManager.get_default().set_color_scheme(
@@ -466,9 +467,9 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     def _add_files(self):
         dialog = Gtk.FileDialog.new()
-        dialog.set_title('Seleccionar archivos MP3')
+        dialog.set_title(_('Select MP3 files'))
         f = Gtk.FileFilter()
-        f.set_name('Archivos MP3')
+        f.set_name(_('MP3 files'))
         f.add_pattern('*.mp3')
         store = Gio.ListStore.new(Gtk.FileFilter)
         store.append(f)
@@ -491,7 +492,7 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     def _add_folder(self):
         dialog = Gtk.FileDialog.new()
-        dialog.set_title('Seleccionar carpeta de música')
+        dialog.set_title(_('Select music folder'))
         default = self._config.get('default_folder')
         if default and os.path.isdir(default):
             dialog.set_initial_folder(Gio.File.new_for_path(default))
@@ -534,7 +535,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         while (row := self.listbox.get_row_at_index(0)) is not None:
             self.listbox.remove(row)
         self.current_idx = -1
-        self.lbl_title.set_label('Sin reproducción')
+        self.lbl_title.set_label(_('No playback'))
         self.lbl_artist.set_label('—')
         self.lbl_elapsed.set_label('0:00')
         self.lbl_total.set_label('0:00')
@@ -544,7 +545,7 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     def _update_count(self):
         n = len(self.playlist)
-        self.lbl_count.set_label(f"{n} canción{'es' if n != 1 else ''}")
+        self.lbl_count.set_label(ngettext('%d song', '%d songs', n) % n)
 
     def _on_row_activated(self, listbox, row):
         self._play_index(row.get_index())
@@ -585,7 +586,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         try:
             duration = self.audio.load(path)
         except Exception as e:
-            self._show_error(f'No se puede reproducir:\n{os.path.basename(path)}\n\n{e}')
+            self._show_error(f'{_("Cannot play:")}\n{os.path.basename(path)}\n\n{e}')
             return
         self.lbl_total.set_label(f'-{fmt_time(duration)}' if duration > 0 else '0:00')
         self.seek_scale.set_value(0)
@@ -671,7 +672,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.shuffle_on = btn.get_active()
         self._shuffle_played.clear()
         self.btn_shuffle.set_tooltip_text(
-            'Orden aleatorio: activado' if self.shuffle_on else 'Orden aleatorio: desactivado'
+            _('Shuffle: on') if self.shuffle_on else _('Shuffle: off')
         )
         if self._mpris:
             self._mpris.notify('Shuffle')
@@ -687,9 +688,9 @@ class PlayerWindow(Adw.ApplicationWindow):
             'media-playlist-repeat-song-symbolic',
         ]
         tooltips = [
-            'Repetición: desactivada',
-            'Repetición: toda la lista',
-            'Repetición: canción actual',
+            _('Repeat: off'),
+            _('Repeat: all'),
+            _('Repeat: one'),
         ]
         self.btn_repeat.set_icon_name(icons[mode])
         self.btn_repeat.set_tooltip_text(tooltips[mode])
@@ -807,6 +808,6 @@ class PlayerWindow(Adw.ApplicationWindow):
     # ── Utilidades ────────────────────────────────────────────────────────────
 
     def _show_error(self, msg):
-        dialog = Adw.MessageDialog(transient_for=self, heading='Error', body=msg)
-        dialog.add_response('ok', 'OK')
+        dialog = Adw.MessageDialog(transient_for=self, heading=_('Error'), body=msg)
+        dialog.add_response('ok', _('OK'))
         dialog.present()
