@@ -9,12 +9,18 @@ try:
 except Exception:
     pass
 
-from gi.repository import Adw
+import os
+from gi.repository import Adw, Gdk, Gtk
 from player.ui import PlayerWindow
 from player.config import load as config_load
 
 
 def on_activate(app):
+    assets_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'assets')
+    display = Gdk.Display.get_default()
+    if display:
+        Gtk.IconTheme.get_for_display(display).add_search_path(assets_dir)
+
     cfg = config_load()
     scheme = cfg.get('color_scheme', 'dark')
     style = Adw.StyleManager.get_default()
@@ -26,7 +32,7 @@ def on_activate(app):
 
 
 def main():
-    app = Adw.Application(application_id='com.felix.reproductor')
+    app = Adw.Application(application_id='com.felix.saxtune')
     app.connect('activate', on_activate)
     app.run()
 

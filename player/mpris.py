@@ -3,7 +3,7 @@ import dbus
 import dbus.service
 from gi.repository import GLib
 
-BUS_NAME   = 'org.mpris.MediaPlayer2.reproductor'
+BUS_NAME   = 'org.mpris.MediaPlayer2.saxtune'
 OBJ_PATH   = '/org/mpris/MediaPlayer2'
 IFACE_APP  = 'org.mpris.MediaPlayer2'
 IFACE_PLAY = 'org.mpris.MediaPlayer2.Player'
@@ -108,7 +108,7 @@ class MprisService(dbus.service.Object):
                 'CanQuit':             dbus.Boolean(True),
                 'CanRaise':            dbus.Boolean(True),
                 'HasTrackList':        dbus.Boolean(False),
-                'Identity':            dbus.String('Reproductor de Música'),
+                'Identity':            dbus.String('SaxTune'),
                 'SupportedUriSchemes': dbus.Array(['file'], signature='s'),
                 'SupportedMimeTypes':  dbus.Array(['audio/mpeg'], signature='s'),
             }

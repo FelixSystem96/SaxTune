@@ -1,7 +1,7 @@
 import json
 import os
 
-_PATH = os.path.expanduser('~/.config/reproductor-gtk/config.json')
+_PATH = os.path.expanduser('~/.config/saxtune/config.json')
 
 
 def load():

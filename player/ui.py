@@ -21,7 +21,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         super().__init__(application=app)
         self._config = config_load()
         self._mpris = None
-        self.set_title('Reproductor de Música')
+        self.set_title('SaxTune')
         self.set_default_size(580, 560)
         self.set_size_request(480, 460)
         self.connect('notify::maximized', self._on_maximized_changed)
@@ -60,7 +60,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         header.pack_start(btn_folder)
 
         btn_settings = Gtk.MenuButton()
-        btn_settings.set_icon_name('preferences-system-symbolic')
+        btn_settings.set_icon_name('open-menu-symbolic')
         btn_settings.add_css_class('flat')
         btn_settings.set_popover(self._build_settings_popover())
         header.pack_end(btn_settings)
