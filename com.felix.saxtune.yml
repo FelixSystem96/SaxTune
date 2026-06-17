@@ -3,6 +3,7 @@ runtime: org.gnome.Platform
 runtime-version: '50'
 sdk: org.gnome.Sdk
 command: saxtune
+separate-locales: false
 
 finish-args:
   - --share=ipc

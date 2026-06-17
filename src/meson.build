@@ -3,6 +3,7 @@ python = import('python')
 conf = configuration_data()
 conf.set('PYTHON', python.find_installation('python3').path())
 conf.set('pkgdatadir', join_paths(get_option('prefix'), get_option('datadir'), meson.project_name()))
+conf.set('localedir', join_paths(get_option('prefix'), get_option('localedir')))
 
 configure_file(
   input: 'saxtune.in',
