@@ -75,8 +75,8 @@ class AudioPlayer:
     def is_busy(self):
         if self._eos:
             return False
-        _, state, _ = self._player.get_state(0)
-        return state == Gst.State.PLAYING
+        _, state, pending = self._player.get_state(0)
+        return state == Gst.State.PLAYING or pending == Gst.State.PLAYING
 
     def get_metadata(self, path):
         if not MUTAGEN_OK:

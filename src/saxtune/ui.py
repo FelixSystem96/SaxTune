@@ -33,6 +33,8 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.shuffle_on = False
         self.repeat_mode = 0   # 0=off  1=all  2=one
         self.seek_dragging = False
+        self._updating_seek = False
+        self._seek_debounce_id = None
         self._timer_id = None
         self.audio = AudioPlayer()
         self._build_ui()
@@ -190,10 +192,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.seek_scale.set_draw_value(False)
         self.seek_scale.set_hexpand(True)
 
-        gesture = Gtk.GestureClick.new()
-        gesture.connect('pressed', lambda g, n, x, y: setattr(self, 'seek_dragging', True))
-        gesture.connect('released', self._seek_released)
-        self.seek_scale.add_controller(gesture)
+        self.seek_scale.connect('value-changed', self._on_seek_value_changed)
 
         prog.append(self.seek_scale)
         box.append(prog)
@@ -410,8 +409,11 @@ class PlayerWindow(Adw.ApplicationWindow):
                 self.art_stack.set_visible_child_name('icon')
         else:
             self.art_stack.set_visible_child_name('icon')
-        duration = self.audio.load(path)
-        self.lbl_total.set_label(fmt_time(duration))
+        try:
+            duration = self.audio.load(path)
+        except Exception:
+            duration = 0.0
+        self.lbl_total.set_label(f'-{fmt_time(duration)}' if duration > 0 else '0:00')
 
     def _on_maximized_changed(self, *_):
         if not self.is_maximized():
@@ -548,8 +550,12 @@ class PlayerWindow(Adw.ApplicationWindow):
         else:
             self.art_stack.set_visible_child_name('icon')
 
-        duration = self.audio.load(path)
-        self.lbl_total.set_label(fmt_time(duration))
+        try:
+            duration = self.audio.load(path)
+        except Exception as e:
+            self._show_error(f'No se puede reproducir:\n{os.path.basename(path)}\n\n{e}')
+            return
+        self.lbl_total.set_label(f'-{fmt_time(duration)}' if duration > 0 else '0:00')
         self.seek_scale.set_value(0)
         self.lbl_elapsed.set_label('0:00')
 
@@ -653,11 +659,28 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     # ── Seek ──────────────────────────────────────────────────────────────────
 
-    def _seek_released(self, gesture, n_press, x, y):
-        self.seek_dragging = False
+    def _on_seek_value_changed(self, scale):
+        if self._updating_seek:
+            return
         if self.audio.duration > 0 and self.is_playing:
-            pos = self.seek_scale.get_value() / 100 * self.audio.duration
-            self.audio.set_pos(pos)
+            pos = scale.get_value() / 100 * self.audio.duration
+            self.seek_dragging = True
+            self.lbl_elapsed.set_label(fmt_time(pos))
+            remaining = max(0.0, self.audio.duration - pos)
+            self.lbl_total.set_label(f'-{fmt_time(remaining)}')
+            if self._seek_debounce_id:
+                GLib.source_remove(self._seek_debounce_id)
+            self._seek_debounce_id = GLib.timeout_add(150, self._do_seek, pos)
+
+    def _do_seek(self, pos):
+        self._seek_debounce_id = None
+        self.audio.set_pos(pos)
+        GLib.timeout_add(400, self._clear_seek_dragging)
+        return False
+
+    def _clear_seek_dragging(self):
+        self.seek_dragging = False
+        return False
 
     # ── Timer ─────────────────────────────────────────────────────────────────
 
@@ -671,12 +694,16 @@ class PlayerWindow(Adw.ApplicationWindow):
             self._timer_id = None
 
     def _tick(self):
-        if self.is_playing and not self.is_paused:
+        if self.is_playing and not self.is_paused and not self.seek_dragging:
             elapsed = self.audio.get_pos()
             self.lbl_elapsed.set_label(fmt_time(elapsed))
-            if not self.seek_dragging and self.audio.duration > 0:
+            if self.audio.duration > 0:
+                remaining = max(0.0, self.audio.duration - elapsed)
+                self.lbl_total.set_label(f'-{fmt_time(remaining)}')
                 pct = min(elapsed / self.audio.duration * 100, 100)
+                self._updating_seek = True
                 self.seek_scale.set_value(pct)
+                self._updating_seek = False
         return True
 
     def _poll_end(self):
