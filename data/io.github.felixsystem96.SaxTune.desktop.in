@@ -4,5 +4,5 @@ Comment=Reproductor de música minimalista
 Exec=@bindir@/saxtune
 Icon=io.github.felixsystem96.SaxTune
 Type=Application
-Categories=Audio;Music;Player;GTK;
+Categories=AudioVideo;Audio;Music;Player;GTK;
 StartupWMClass=io.github.felixsystem96.SaxTune
