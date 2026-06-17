@@ -12,7 +12,7 @@
   </description>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
-  <url type="homepage">https://github.com/FelixSystem96/reproductor-gtk</url>
+  <url type="homepage">https://github.com/FelixSystem96/SaxTune</url>
   <launchable type="desktop-id">com.felix.saxtune.desktop</launchable>
   <provides>
     <binary>saxtune</binary>
