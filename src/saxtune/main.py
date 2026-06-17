@@ -8,7 +8,7 @@ try:
 except Exception:
     pass
 
-from gi.repository import Adw
+from gi.repository import Adw, GLib
 from .ui import PlayerWindow
 from .config import load as config_load
 
@@ -25,6 +25,7 @@ def on_activate(app):
 
 
 def main():
-    app = Adw.Application(application_id='com.felix.saxtune')
+    GLib.set_prgname('io.github.felixsystem96.SaxTune')
+    app = Adw.Application(application_id='io.github.felixsystem96.SaxTune')
     app.connect('activate', on_activate)
     app.run()

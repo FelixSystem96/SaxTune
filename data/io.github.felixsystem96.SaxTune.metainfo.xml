@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.felix.saxtune</id>
+  <id>io.github.felixsystem96.SaxTune</id>
   <name>SaxTune</name>
   <summary>Reproductor de música minimalista</summary>
   <description>
@@ -13,7 +13,7 @@
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <url type="homepage">https://github.com/FelixSystem96/SaxTune</url>
-  <launchable type="desktop-id">com.felix.saxtune.desktop</launchable>
+  <launchable type="desktop-id">io.github.felixsystem96.SaxTune.desktop</launchable>
   <provides>
     <binary>saxtune</binary>
   </provides>

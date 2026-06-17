@@ -1,4 +1,4 @@
-app-id: com.felix.saxtune
+app-id: io.github.felixsystem96.SaxTune
 runtime: org.gnome.Platform
 runtime-version: '50'
 sdk: org.gnome.Sdk
@@ -36,5 +36,7 @@ modules:
   - name: saxtune
     buildsystem: meson
     sources:
-      - type: dir
-        path: .
+      - type: git
+        url: https://github.com/FelixSystem96/SaxTune.git
+        tag: v1.0.0
+        commit: 84bc3ea412da171459d53086aad12d6f2ece8759
