@@ -1,4 +1,6 @@
-import pygame
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import Gst, GLib
 
 try:
     from mutagen.mp3 import MP3
@@ -6,15 +8,32 @@ try:
 except ImportError:
     MUTAGEN_OK = False
 
+Gst.init(None)
+
 
 class AudioPlayer:
     def __init__(self):
-        pygame.mixer.init()
         self.volume = 0.7
         self.duration = 0.0
+        self._eos = False
+        self._player = Gst.ElementFactory.make('playbin', 'player')
+        self._player.set_property('volume', self.volume)
+        bus = self._player.get_bus()
+        bus.add_signal_watch()
+        bus.connect('message::eos', self._on_eos)
+        bus.connect('message::error', self._on_error)
+
+    def _on_eos(self, bus, msg):
+        self._eos = True
+
+    def _on_error(self, bus, msg):
+        err, _ = msg.parse_error()
+        print(f'GStreamer: {err}')
 
     def load(self, path):
-        pygame.mixer.music.load(path)
+        self._eos = False
+        self._player.set_state(Gst.State.NULL)
+        self._player.set_property('uri', GLib.filename_to_uri(path))
         self.duration = 0.0
         if MUTAGEN_OK:
             try:
@@ -24,31 +43,40 @@ class AudioPlayer:
         return self.duration
 
     def play(self):
-        pygame.mixer.music.set_volume(self.volume)
-        pygame.mixer.music.play()
+        self._eos = False
+        self._player.set_property('volume', self.volume)
+        self._player.set_state(Gst.State.PLAYING)
 
     def pause(self):
-        pygame.mixer.music.pause()
+        self._player.set_state(Gst.State.PAUSED)
 
     def unpause(self):
-        pygame.mixer.music.unpause()
+        self._player.set_state(Gst.State.PLAYING)
 
     def stop(self):
-        pygame.mixer.music.stop()
+        self._player.set_state(Gst.State.NULL)
+        self._eos = False
 
     def get_pos(self):
-        ms = pygame.mixer.music.get_pos()
-        return ms / 1000.0 if ms >= 0 else 0.0
+        ok, pos = self._player.query_position(Gst.Format.TIME)
+        return pos / Gst.SECOND if ok else 0.0
 
     def set_pos(self, seconds):
-        pygame.mixer.music.set_pos(seconds)
+        self._player.seek_simple(
+            Gst.Format.TIME,
+            Gst.SeekFlags.FLUSH | Gst.SeekFlags.KEY_UNIT,
+            int(seconds * Gst.SECOND),
+        )
 
     def set_volume(self, v):
         self.volume = v
-        pygame.mixer.music.set_volume(v)
+        self._player.set_property('volume', v)
 
     def is_busy(self):
-        return pygame.mixer.music.get_busy()
+        if self._eos:
+            return False
+        _, state, _ = self._player.get_state(0)
+        return state == Gst.State.PLAYING
 
     def get_metadata(self, path):
         if not MUTAGEN_OK:
