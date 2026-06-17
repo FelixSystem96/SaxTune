@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=SaxTune
+Comment=Reproductor de música minimalista
+Exec=@bindir@/saxtune
+Icon=com.felix.saxtune
+Type=Application
+Categories=Audio;Music;Player;GTK;
+StartupWMClass=com.felix.saxtune

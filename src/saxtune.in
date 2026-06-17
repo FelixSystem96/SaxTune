@@ -1,0 +1,15 @@
+#!@PYTHON@
+import sys
+import os
+import gi
+
+gi.require_version('Gtk', '4.0')
+gi.require_version('Adw', '1')
+
+pkgdatadir = '@pkgdatadir@'
+sys.path.insert(1, pkgdatadir)
+
+from saxtune.main import main
+
+if __name__ == '__main__':
+    sys.exit(main())
