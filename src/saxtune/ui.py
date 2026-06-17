@@ -32,6 +32,7 @@ class PlayerWindow(Adw.ApplicationWindow):
         self.is_paused = False
         self.shuffle_on = False
         self.repeat_mode = 0   # 0=off  1=all  2=one
+        self._shuffle_played = set()
         self.seek_dragging = False
         self._updating_seek = False
         self._seek_debounce_id = None
@@ -499,6 +500,7 @@ class PlayerWindow(Adw.ApplicationWindow):
     def _clear_playlist(self):
         self._stop()
         self.playlist.clear()
+        self._shuffle_played.clear()
         while (row := self.listbox.get_row_at_index(0)) is not None:
             self.listbox.remove(row)
         self.current_idx = -1
@@ -613,8 +615,16 @@ class PlayerWindow(Adw.ApplicationWindow):
         if not self.playlist:
             return
         if self.shuffle_on:
-            candidates = [i for i in range(len(self.playlist)) if i != self.current_idx]
-            idx = random.choice(candidates) if candidates else 0
+            self._shuffle_played.add(self.current_idx)
+            unplayed = [i for i in range(len(self.playlist)) if i not in self._shuffle_played]
+            if not unplayed:
+                if self.repeat_mode >= 1:
+                    self._shuffle_played.clear()
+                    unplayed = [i for i in range(len(self.playlist)) if i != self.current_idx]
+                else:
+                    self._stop()
+                    return
+            idx = random.choice(unplayed)
         else:
             idx = self.current_idx + 1
             if idx >= len(self.playlist):
@@ -629,6 +639,7 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     def _on_shuffle_toggled(self, btn):
         self.shuffle_on = btn.get_active()
+        self._shuffle_played.clear()
         if self._mpris:
             self._mpris.notify('Shuffle')
 
