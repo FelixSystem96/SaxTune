@@ -695,6 +695,10 @@ class PlayerWindow(Adw.ApplicationWindow):
 
     def _tick(self):
         if self.is_playing and not self.is_paused and not self.seek_dragging:
+            if self.audio.duration == 0.0:
+                self.audio.query_duration()
+                if self.audio.duration > 0:
+                    self.lbl_total.set_label(f'-{fmt_time(self.audio.duration)}')
             elapsed = self.audio.get_pos()
             self.lbl_elapsed.set_label(fmt_time(elapsed))
             if self.audio.duration > 0:

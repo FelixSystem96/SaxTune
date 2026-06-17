@@ -57,6 +57,12 @@ class AudioPlayer:
         self._player.set_state(Gst.State.NULL)
         self._eos = False
 
+    def query_duration(self):
+        ok, dur = self._player.query_duration(Gst.Format.TIME)
+        if ok and dur > 0:
+            self.duration = dur / Gst.SECOND
+        return self.duration
+
     def get_pos(self):
         ok, pos = self._player.query_position(Gst.Format.TIME)
         return pos / Gst.SECOND if ok else 0.0
