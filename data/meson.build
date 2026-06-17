@@ -13,11 +13,9 @@ install_data('com.felix.saxtune.metainfo.xml',
   install_dir: get_option('datadir') / 'metainfo'
 )
 
-foreach size : ['16x16', '32x32', '48x48', '64x64', '128x128', '256x256', '512x512']
-  install_data('icons/@0@/com.felix.saxtune.png'.format(size),
-    install_dir: get_option('datadir') / 'icons/hicolor' / size / 'apps'
-  )
-endforeach
+install_data('icons/scalable/com.felix.saxtune.svg',
+  install_dir: get_option('datadir') / 'icons/hicolor/scalable/apps'
+)
 
 gnome = import('gnome')
 gnome.post_install(
